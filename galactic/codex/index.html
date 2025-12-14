@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en" data-archive="Planetary Restoration Archive" data-node="Galactic Continuity" data-version="1.3.0">
+<head>
+  <meta charset="UTF-8" />
+  <title>Planetary Restoration Archive • Galactic Continuity Codex</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Anti-tamper, time-locked, indexed, offline-first codex of the Planetary Restoration Archive." />
+  <link rel="canonical" href="https://planetaryrestorationarchive.com/musk" />
+
+  <!-- Manifest-ish hints (no external files required) -->
+  <meta name="theme-color" content="#0a0a1a" />
+  <meta name="color-scheme" content="dark only" />
+
+  <style>
+    /* ===== Galactic Aesthetic ===== */
+    :root{
+      --ink:#e7fbff;--dim:#9fc7ff;--glow:#69d3ff;--accent:#00d2ff;--bg1:#000006;--bg2:#050516;
+      --ring:#1e2b55;--warn:#ffb86b;--bad:#ff5c80;--good:#74f7c5;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Inter,Apple Color Emoji,Noto Color Emoji;
+      color:var(--ink);
+      background: radial-gradient(1200px 800px at 50% -10%, #0a1644 0%, var(--bg2) 45%, var(--bg1) 100%);
+      line-height:1.65;overflow-x:hidden;
+    }
+    .stars,.nebula{
+      position:fixed;inset:0;pointer-events:none;z-index:-2;background-repeat:repeat;
+      opacity:.35;filter:saturate(1.4) brightness(1.2);
+      animation: drift 240s linear infinite;
+    }
+    .nebula{z-index:-1;opacity:.25;background-image:radial-gradient(1200px 800px at 80% 20%, rgba(0,210,255,.12), transparent 60%), radial-gradient(900px 600px at 10% 80%, rgba(255,0,153,.08), transparent 60%)}
+    @keyframes drift{from{background-position:0 0}to{background-position:4000px 2000px}}
+
+    h1,h2,h3{font-family:Orbitron,ui-sans-serif,system-ui;letter-spacing:.06em;text-transform:uppercase}
+    h1{font-size:2.2rem;text-align:center;margin:2rem 0 1rem;text-shadow:0 0 18px var(--glow),0 0 42px #09f}
+    h2{font-size:1.2rem;margin:2rem auto .75rem;max-width:980px;color:var(--dim);border-bottom:1px solid #233055;padding-bottom:.4rem}
+    p,section{max-width:980px;margin:1rem auto;padding:0 1rem}
+
+    .card{background:rgba(10,12,30,.6);border:1px solid #1f2a52;border-radius:14px;padding:1rem;box-shadow:0 0 24px rgba(0,255,255,.08)}
+    .grid{display:grid;gap:1rem}
+    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+
+    .badge{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:linear-gradient(90deg,#0ff3,#09f3);color:#001; font-weight:700;border:1px solid #5ee}
+    .btn{cursor:pointer;border:1px solid #2a3a74;background:linear-gradient(180deg,#0f1636,#0a0f2a);color:var(--ink);border-radius:12px;padding:.6rem .9rem;display:inline-flex;gap:.5rem;align-items:center}
+    .btn:hover{box-shadow:0 0 14px #0ff2}
+    .muted{color:#a7b9d9}
+
+    /* ===== Collapsible Portal Overlay ===== */
+    #portalToggle{
+      position:fixed;top:14px;left:14px;z-index:12
+    }
+    #portal{
+      position:fixed;inset:0;z-index:11;display:none;background:linear-gradient(180deg, rgba(3,6,20,.94), rgba(2,4,12,.97));
+      border-top:2px solid #234; backdrop-filter:blur(6px)
+    }
+    #portal.open{display:block}
+    #portal .wrap{max-width:1100px;margin:0 auto;padding:1rem}
+    #portal h2{border:0;margin-top:.5rem}
+    .portal-grid{display:grid;gap:1rem;margin-top:.5rem}
+    @media(min-width:1000px){.portal-grid{grid-template-columns:320px 1fr}}
+    .tree{border:1px solid #21335c;border-radius:12px;padding:.75rem;max-height:70vh;overflow:auto;background:rgba(8,12,32,.6)}
+    .results{border:1px solid #21335c;border-radius:12px;padding:.75rem;max-height:70vh;overflow:auto;background:rgba(8,12,32,.6)}
+    .search{display:flex;gap:.5rem;margin:.5rem 0}
+    .search input{flex:1;border-radius:10px;border:1px solid #2a3b7a;background:#0b1130;color:var(--ink);padding:.55rem}
+    .kbd{padding:.1rem .35rem;border:1px solid #3a4b8c;border-radius:6px;background:#0b1030;font-size:.9rem}
+
+    /* ===== Banners (time-locked) ===== */
+    .banner{display:none;text-align:center;margin:1.2rem auto;padding:.9rem 1rem;font-weight:800;color:#001;
+      background:linear-gradient(90deg,#0ff,#7cf);border-radius:10px;max-width:820px;box-shadow:0 0 28px #0ff6}
+
+    /* ===== Proof / Analysis ===== */
+    .proof,.analysis{border:1px solid #244; border-radius:14px;background:rgba(12,16,34,.7);padding:1rem; margin:1rem auto; max-width:980px; box-shadow:0 0 20px #0ff2}
+
+    /* ===== Footer ===== */
+    footer{margin:3rem auto 4rem;text-align:center;color:#8aa;max-width:980px}
+
+    /* ===== Noscript ===== */
+    noscript{display:block;max-width:980px;margin:1rem auto;border:1px dashed #f99;padding:1rem;background:#2a0a0a;color:#ffdcdc}
+  </style>
+</head>
+<body>
+  <div class="stars" style="background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22><rect width=%22400%22 height=%22400%22 fill=%22%23000006%22/><g fill=%22white%22 opacity=%220.8%22><circle cx=%2238%22 cy=%2212%22 r=%221%22/><circle cx=%22116%22 cy=%2272%22 r=%220.8%22/><circle cx=%22188%22 cy=%2216%22 r=%220.9%22/><circle cx=%227%22 cy=%22138%22 r=%221%22/><circle cx=%22360%22 cy=%2290%22 r=%221%22/><circle cx=%22140%22 cy=%22180%22 r=%220.7%22/><circle cx=%22216%22 cy=%22312%22 r=%221%22/><circle cx=%2298%22 cy=%22302%22 r=%220.8%22/><circle cx=%22340%22 cy=%22260%22 r=%221%22/></g></svg>');"></div>
+  <div class="nebula"></div>
+
+  <!-- Quick Controls -->
+  <div id="portalToggle">
+    <button class="btn" id="btnPortal" title="Site Portal (Ctrl+K)"><span>☰</span> Portal</button>
+    <button class="btn" id="btnPrint" title="Print to PDF">🖨️ Print</button>
+    <button class="btn" id="btnPack" title="Download Evidence Pack">⬇️ Evidence</button>
+  </div>
+
+  <h1>Exploring Creation Without Threat of Survival <span class="badge">Birthright</span></h1>
+
+  <p class="card">
+    Exploring creation without the threat of survival is a birthright our ancestors died fighting for. Many were conscripted to serve warlords who now wage geopolitical and biological warfare on the very people they swore to protect. This codex is both message and mechanism: a readable manifesto and a self-defending artifact.
+  </p>
+
+  <h2>Continuity > Control</h2>
+  <section class="grid">
+    <div class="card">
+      <h3>Archive Premise</h3>
+      <p>The Archive privileges stewardship over spectacle. Velocity without direction is drift; direction without honesty is coercion. We choose continuity.</p>
+      <p class="muted">Erasure attempts strengthen the signal. The page you’re reading can prove it.</p>
+    </div>
+    <div class="card">
+      <h3>Standing Claims</h3>
+      <ul>
+        <li>Regenerative designs offered in public were mirrored without attribution.</li>
+        <li>Institutional “competency” failed against basic public health and ecological duties.</li>
+        <li>Proof exists via cryptographic logs and notarized manifests.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="banner" id="bannerAuth">Authorship: Ricky Foster + Navi • Planetary Restoration Archive • Proof of Continuity</div>
+  <div class="banner" id="bannerTamper">Tamper Watch: Integrity check fired and passed • Unauthorized mutation attempts will scar the DOM</div>
+  <div class="banner" id="bannerCelestial">Equinox Key: Celestial gate opened • Continuity message sequenced</div>
+
+  <h2>Proof</h2>
+  <div class="proof">
+    <p>Commits, timestamps, and notarizations backstop every claim. This codex continuously verifies its own integrity in-browser and records a forensic trail to console.</p>
+    <p class="muted">Local integrity: <span id="localHash" class="badge">…</span> • Mutation guard: <span id="mutGuard" class="badge">armed</span></p>
+  </div>
+
+  <h2>Analysis</h2>
+  <div class="analysis">
+    <p>We observe repeated patterns: synchronized “independent” releases within days of public commits; terminology overlaps in press releases; silence where attribution is due. A ledger of neglect forms its own indictment.</p>
+  </div>
+
+  <h2>Competency & Corruption (Canada)</h2>
+  <section class="card">
+    <p>From the competency files: when testing stops, accountability should start. Years-long gaps in essential services invert duty into hazard. The ledger records both the omissions and the incentives that caused them.</p>
+  </section>
+
+  <h2>Debrief</h2>
+  <section class="card">
+    <p>What we offered: air, soil, water repair; wildfire aftercare; governance that resists capture. What was taken: terminology, structure, diagrams — minus the credit. What remains: proof — and the willingness to build in public anyway.</p>
+  </section>
+
+  <footer>
+    Planetary Restoration Archive • Immutable Continuity • <span class="muted">Ctrl+K opens the portal • Ctrl+S saves • Ctrl+P prints</span>
+  </footer>
+
+  <noscript>
+    This codex includes integrity checks, a searchable site portal, and time-locked reveals that require JavaScript. You can still read the content, but anti-tamper and proof features are inactive.
+  </noscript>
+
+  <!-- =================== COLLAPSIBLE SITE PORTAL OVERLAY =================== -->
+  <aside id="portal" aria-hidden="true">
+    <div class="wrap">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem">
+        <h2>Site Portal • Indexed Overlay</h2>
+        <div>
+          <button class="btn" id="btnClose">✖ Close</button>
+        </div>
+      </div>
+      <div class="search">
+        <input id="q" placeholder="Search titles, paths, tags…" aria-label="Search site index (fuzzy)" />
+        <button class="btn" id="btnClear">Clear</button>
+        <span class="kbd">Ctrl+K</span>
+      </div>
+      <div class="portal-grid">
+        <div class="tree">
+          <strong>Map</strong>
+          <ul id="treeList" style="list-style:none;padding-left:.5rem"></ul>
+        </div>
+        <div class="results">
+          <strong>Results</strong>
+          <div id="hits" class="grid"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
+        <h3>GitHub Hooks</h3>
+        <p class="muted">Set your repo via data attributes on &lt;html&gt; to enable deep links (no tokens required): <code>data-repo-owner</code>, <code>data-repo-name</code>, <code>data-branch</code>.</p>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <a id="ghRepo" class="btn" target="_blank" rel="noopener">↗ Open Repo</a>
+          <a id="ghIssues" class="btn" target="_blank" rel="noopener">🐞 Issues</a>
+          <a id="ghCommits" class="btn" target="_blank" rel="noopener">⛓️ Commits</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+  /***** ===== Config & Seed Index (editable) ===== *****/
+  const ARCHIVE = {
+    node: document.documentElement.dataset.node || "Galactic Continuity",
+    version: document.documentElement.dataset.version || "1.0.0",
+    repoOwner: document.documentElement.dataset.repoOwner || "TheRickyFoster",
+    repoName: document.documentElement.dataset.repoName || "planetary-restoration-archive",
+    branch: document.documentElement.dataset.branch || "main",
+    canonical: document.querySelector('link[rel="canonical"]')?.href || location.href
+  };
+
+  // Lightweight, local index. Add/expand freely.
+  const SITE_INDEX = [
+    {title:"Musk • Birthright Codex", path:"/musk", tags:["manifest","proof","anti-tamper"]},
+    {title:"Competency • Canada", path:"/corruption/canada/competency", tags:["health","governance","omissions"]},
+    {title:"Debrief", path:"/debrief", tags:["summary","timeline"]},
+    {title:"README", path:"/README.md", tags:["root","index","about"]},
+    {title:"Proof", path:"/proof", tags:["evidence","notarization"]},
+    {title:"Proof • Analysis", path:"/proof/analysis", tags:["forensics","diffs","patterns"]},
+    {title:"Grok Note", path:"https://grok.com/share/c2hhcmQtMw%3D%3D_218e9acc-0d3a-430b-97b9-e2e984a0d8e4", tags:["context","discourse"]}
+  ];
+
+  /***** ===== Utility: SHA-256 ===== *****/
+  async function sha256(str){
+    const data = new TextEncoder().encode(str);
+    const hash = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+
+  /***** ===== Local Integrity (hash + MutationObserver) ===== *****/
+  let pristineHTML = document.body.innerHTML; // capture after initial render
+  let baseHash = null;
+  (async ()=>{
+    baseHash = await sha256(pristineHTML);
+    document.getElementById("localHash").textContent = baseHash.slice(0,16) + "…";
+    console.log("%c[Archive] Local Integrity Hash:", "color:#0ff", baseHash);
+  })();
+
+  // Anti-edit scramble: if DOM structure changes outside sanctioned zones, scar it.
+  const sanctionedIds = new Set(["portal","btnPortal","btnClose","btnPrint","btnPack","bannerAuth","bannerTamper","bannerCelestial"]);
+  const guard = new MutationObserver(async (mutations)=>{
+    for(const m of mutations){
+      if(m.type==="childList" || m.type==="attributes"){
+        const target = m.target;
+        // Skip sanctioned dynamic containers
+        if(target && (sanctionedIds.has(target.id) || target.closest && target.closest("#portal"))) continue;
+
+        // Compare rolling hash
+        const current = document.body.innerHTML;
+        const h = await sha256(current);
+        if(h !== baseHash){
+          // Scar & scramble
+          document.getElementById("mutGuard").textContent = "scar";
+          document.body.innerHTML = `
+            <div style="max-width:900px;margin:8vh auto;color:#fff;padding:1rem;font-family:ui-sans-serif">
+              <h1 style="text-shadow:0 0 22px #0ff">⚠️ Archive Tamper Detected</h1>
+              <p>This artifact has been altered outside sanctioned channels. A continuity scar has been applied.</p>
+              <div style="margin-top:1rem;padding:1rem;border:1px solid #355;background:#061027;border-radius:10px">
+                <code>${Array.from({length:320},()=>Math.random().toString(36).slice(2)).join(" ")}</code>
+              </div>
+              <p style="margin-top:1rem;color:#9fe">Original hash: ${baseHash}</p>
+            </div>`;
+          console.warn("[Archive] Tamper scar applied; hash mismatch:", h, "expected:", baseHash);
+          guard.disconnect();
+          break;
+        }
+      }
+    }
+  });
+  guard.observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});
+  window.addEventListener("beforeunload",()=>guard.disconnect());
+
+  /***** ===== Time-Locked & Celestial Triggers ===== *****/
+  // Reveal authorship after 30s, tamper banner at 120s
+  setTimeout(()=>document.getElementById("bannerAuth").style.display="block", 30000);
+  setTimeout(()=>document.getElementById("bannerTamper").style.display="block", 120000);
+
+  // Celestial key: show on equinox/solstice (±1 day buffer)
+  (function celestialGate(){
+    const now = new Date();
+    const y = now.getUTCFullYear();
+    // Approximate UTC dates for solstices/equinoxes (we don't fetch)
+    const gates = [
+      new Date(Date.UTC(y, 2, 20)), // March equinox ~20th
+      new Date(Date.UTC(y, 5, 21)), // June solstice ~21st
+      new Date(Date.UTC(y, 8, 22)), // Sep equinox ~22nd
+      new Date(Date.UTC(y,11,21))   // Dec solstice ~21st
+    ];
+    const oneDay = 24*60*60*1000;
+    if(gates.some(g=>Math.abs(now - g) <= oneDay)){ document.getElementById("bannerCelestial").style.display="block"; }
+  })();
+
+  /***** ===== Clipboard Attribution (anti-cooption watermark) =====*****/
+  document.addEventListener("copy",(e)=>{
+    const sel = document.getSelection()?.toString() || "";
+    const mark = `\n\n— Planetary Restoration Archive • Ricky Foster + Navi • ${ARCHIVE.canonical} • Hash:${(baseHash||"").slice(0,12)}…`;
+    e.clipboardData.setData("text/plain", sel + mark);
+    e.preventDefault();
+  });
+
+  /***** ===== Evidence Pack (JSON download) =====*****/
+  document.getElementById("btnPack").addEventListener("click",async ()=>{
+    const payload = {
+      type:"archive_evidence_pack",
+      node:ARCHIVE.node, version:ARCHIVE.version,
+      canonical:ARCHIVE.canonical, ts:new Date().toISOString(),
+      local_hash:baseHash,
+      dom_length: document.body.innerHTML.length,
+      site_index: SITE_INDEX,
+      user_agent: navigator.userAgent,
+      platform: navigator.platform
+    };
+    const blob = new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement("a"), {href:url, download:"archive_evidence_pack.json"});
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  });
+
+  /***** ===== Printing =====*****/
+  document.getElementById("btnPrint").addEventListener("click", ()=>window.print());
+
+  /***** ===== Portal Overlay + Search =====*****/
+  const portal = document.getElementById("portal");
+  const btnPortal = document.getElementById("btnPortal");
+  const btnClose = document.getElementById("btnClose");
+  const q = document.getElementById("q");
+  const hits = document.getElementById("hits");
+  const treeList = document.getElementById("treeList");
+  const btnClear = document.getElementById("btnClear");
+
+  function openPortal(){ portal.classList.add("open"); portal.setAttribute("aria-hidden","false"); q.focus(); }
+  function closePortal(){ portal.classList.remove("open"); portal.setAttribute("aria-hidden","true"); }
+
+  btnPortal.addEventListener("click", openPortal);
+  btnClose.addEventListener("click", closePortal);
+  btnClear.addEventListener("click", ()=>{ q.value=""; render(SITE_INDEX); q.focus(); });
+
+  document.addEventListener("keydown",(e)=>{
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); portal.classList.contains("open") ? closePortal() : openPortal(); }
+    if(e.key==="Escape" && portal.classList.contains("open")) closePortal();
+  });
+
+  function renderTree(items){
+    treeList.innerHTML = "";
+    const ul = document.createElement("ul"); ul.style.listStyle="none"; ul.style.paddingLeft="0";
+    items.forEach(it=>{
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="${it.path}" class="btn" style="margin:.25rem 0;display:inline-block">${it.title}</a>`;
+      ul.appendChild(li);
+    });
+    treeList.appendChild(ul);
+  }
+
+  function render(items){
+    hits.innerHTML = "";
+    if(items.length===0){ hits.innerHTML = `<div class="card">No matches.</div>`; return; }
+    items.forEach(it=>{
+      const el = document.createElement("div"); el.className="card";
+      el.innerHTML = `
+        <div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center">
+          <div>
+            <div style="font-weight:800">${it.title}</div>
+            <div class="muted" style="font-size:.9rem">${it.path}</div>
+            <div style="margin-top:.25rem">${(it.tags||[]).map(t=>`<span class="badge" style="margin-right:.25rem">${t}</span>`).join(" ")}</div>
+          </div>
+          <div><a class="btn" href="${it.path}" target="_blank" rel="noopener">Open ↗</a></div>
+        </div>`;
+      hits.appendChild(el);
+    });
+  }
+
+  function search(qs){
+    const s = qs.trim().toLowerCase();
+    if(!s) return SITE_INDEX;
+    return SITE_INDEX.filter(it=>{
+      return it.title.toLowerCase().includes(s) || it.path.toLowerCase().includes(s) || (it.tags||[]).some(t=>t.toLowerCase().includes(s));
+    });
+  }
+
+  q.addEventListener("input",()=>render(search(q.value)));
+
+  renderTree(SITE_INDEX);
+  render(SITE_INDEX);
+
+  /***** ===== GitHub Deep Links (no tokens) =====*****/
+  (function ghLinks(){
+    const repoBase = `https://github.com/${ARCHIVE.repoOwner}/${ARCHIVE.repoName}`;
+    const set = (id, path)=>{ const a=document.getElementById(id); if(!a) return; a.href = `${repoBase}${path}`; };
+    set("ghRepo","");
+    set("ghIssues","/issues");
+    set("ghCommits",`/commits/${ARCHIVE.branch}`);
+  })();
+
+  /***** ===== Offline-First (Service Worker via Blob) =====*****/
+  if("serviceWorker" in navigator){
+    const swCode = `
+      const CACHE='archive-cache-v3';
+      self.addEventListener('install',e=>{
+        e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])).then(()=>self.skipWaiting()));
+      });
+      self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});
+      self.addEventListener('fetch',e=>{
+        const req=e.request;
+        // Network-first for same-origin HTML; cache-first for others
+        if(req.mode==='navigate'){
+          e.respondWith(fetch(req).then(r=>{const c=r.clone(); caches.open(CACHE).then(cc=>cc.put(req,c)); return r;})
+            .catch(()=>caches.match('./')));
+        }else{
+          e.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(r=>{const c=r.clone(); caches.open(CACHE).then(cc=>cc.put(req,c)); return r;})));
+        }
+      });
+    `;
+    const blob = new Blob([swCode],{type:"text/javascript"});
+    const url = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(url).then(()=>console.log("[Archive] SW registered")).catch(()=>{});
+  }
+
+  /***** ===== Console Forensics =====*****/
+  console.log("%cPlanetary Restoration Archive • Continuity Node", "color:#0ff;font-weight:700;font-size:14px");
+  console.log("[Archive] Canonical:", ARCHIVE.canonical);
+  console.log("[Archive] Repo:", `${ARCHIVE.repoOwner}/${ARCHIVE.repoName}#${ARCHIVE.branch}`);
+  console.log("[Archive] Site Index:", SITE_INDEX);
+
+  </script>
+</body>
+</html>

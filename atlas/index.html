@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Continuity Atlas — 100× per Category • Futuristic Filterable Index</title>
+<meta name="description" content="Standalone offline index with 100 items per category, advanced filters, command palette, and futuristic UI." />
+<style>
+  :root{
+    --bg:#070a12;
+    --fg:#e6ecff;
+    --muted:#a8b2d1;
+    --accent:#66e6ff;
+    --accent-2:#9d6bff;
+    --ok:#3eea9a;
+    --warn:#ffcf5c;
+    --bad:#ff6b6b;
+    --glass: rgba(255,255,255,.06);
+    --glass-2: rgba(255,255,255,.10);
+    --border: rgba(255,255,255,.12);
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --radius: 16px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background: radial-gradient(1200px 1200px at 20% -10%, #101733 0%, #0b0f1f 35%, var(--bg) 70%) fixed;
+    color:var(--fg); font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+    overflow-x:hidden;
+  }
+
+  /* Starfield */
+  canvas#stars{position:fixed; inset:0; z-index:-1; filter:contrast(110%) brightness(110%) blur(0.2px)}
+
+  header{
+    position:sticky; top:0; z-index:20; backdrop-filter:saturate(130%) blur(8px);
+    background:linear-gradient(180deg, rgba(8,12,24,.75), rgba(8,12,24,.35));
+    border-bottom:1px solid var(--border);
+  }
+  .topbar{
+    display:flex; gap:12px; align-items:center; padding:12px clamp(16px, 3vw, 32px);
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.4px;
+  }
+  .logo{
+    width:28px; height:28px; border-radius:8px; background:conic-gradient(from 200deg, var(--accent), var(--accent-2), var(--ok), var(--accent)); box-shadow:0 0 24px rgba(153,102,255,.45);
+  }
+  .pill{
+    padding:6px 10px; border:1px solid var(--border); border-radius:999px; color:var(--muted);
+    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); cursor:default;
+  }
+  .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:rgba(255,255,255,.06); padding:2px 6px; border-radius:6px; border:1px solid var(--border);}
+
+  .toolbar{
+    display:grid; gap:10px; grid-template-columns: 1fr auto auto auto auto;
+    padding:0 clamp(16px, 3vw, 32px) 12px;
+  }
+  .search{
+    display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border);
+    border-radius:12px; background:var(--glass); box-shadow: var(--shadow);
+  }
+  .search input{
+    flex:1; background:transparent; border:0; outline:0; color:var(--fg); font-size:16px;
+  }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px;
+    border:1px solid var(--border); background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    color:var(--fg); cursor:pointer; user-select:none; box-shadow:var(--shadow);
+  }
+  .btn[aria-pressed="true"]{outline:2px solid var(--accent); outline-offset:2px}
+  .btn.primary{border-color:transparent; background:linear-gradient(180deg, rgba(102,230,255,.25), rgba(157,107,255,.20)); box-shadow:0 10px 30px rgba(102,230,255,.25)}
+  .btn.ghost{background:transparent}
+  .sep{height:1px; background:var(--border); margin:6px 0 0 0; grid-column:1/-1}
+
+  main{padding:16px clamp(12px, 3vw, 32px) 80px}
+
+  .filters{
+    display:grid; gap:12px; grid-template-columns: repeat(12, 1fr);
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    border:1px solid var(--border); border-radius:16px; padding:12px; box-shadow:var(--shadow);
+  }
+  .fcol{grid-column: span 3}
+  .fcol.wide{grid-column: span 6}
+  label{display:block; color:var(--muted); font-size:12px; margin:6px 0}
+  select, input[type="range"], input[type="date"]{
+    width:100%; background:rgba(255,255,255,.06); border:1px solid var(--border); color:var(--fg);
+    padding:8px 10px; border-radius:10px;
+  }
+  .tags{display:flex; flex-wrap:wrap; gap:8px}
+  .tag{
+    padding:6px 10px; border-radius:999px; border:1px solid var(--border); cursor:pointer; user-select:none;
+    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); color:var(--muted);
+  }
+  .tag[aria-pressed="true"]{outline:2px solid var(--accent); color:var(--fg)}
+
+  .stats{display:flex; gap:12px; flex-wrap:wrap; margin:12px 0}
+  .stat{
+    padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:var(--glass);
+    min-width:160px;
+  }
+  .stat b{display:block; font-size:18px}
+  .view{
+    display:grid; gap:16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+  .rowview .card{display:grid; grid-template-columns: 48px 1fr auto; align-items:center}
+  .card{
+    position:relative; padding:14px; border:1px solid var(--border); border-radius:16px; background:
+      radial-gradient(800px 400px at 120% -20%, rgba(157,107,255,.12), transparent 40%) ,
+      radial-gradient(800px 400px at -20% 120%, rgba(102,230,255,.10), transparent 40%) ,
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    box-shadow: var(--shadow);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .card:hover{transform: translateY(-3px); border-color: rgba(153,102,255,.35); box-shadow:0 14px 40px rgba(0,0,0,.45)}
+  .badge{
+    position:absolute; top:10px; right:10px; font: 11px ui-monospace, Menlo, Consolas, monospace; color:#fff;
+    padding:4px 8px; border-radius:999px; background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+  .title{font-weight:700; font-size:16px; margin:0 0 6px}
+  .meta{font-size:12px; color:var(--muted)}
+  .metarow{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+  .chip{font-size:12px; padding:4px 8px; border:1px solid var(--border); border-radius:999px; color:var(--muted)}
+  .impactbar{height:6px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; margin-top:10px}
+  .impactbar span{display:block; height:100%; background: linear-gradient(90deg, var(--ok), var(--warn), var(--bad))}
+  .actions{display:flex; gap:8px; margin-top:10px}
+  .mini{font-size:12px; padding:6px 8px; }
+
+  /* Detail modal */
+  dialog{
+    width:min(960px, 92vw); border:1px solid var(--border); border-radius:16px; background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    color:var(--fg); box-shadow:0 30px 70px rgba(0,0,0,.6); padding:0; overflow:hidden;
+  }
+  dialog::backdrop{ backdrop-filter: blur(6px) saturate(120%); background:rgba(3,6,12,.4) }
+  .dhead{display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid var(--border)}
+  .dbody{padding:16px; display:grid; gap:12px; grid-template-columns: 2fr 1fr}
+  .dsection{border:1px solid var(--border); border-radius:12px; padding:12px; background:var(--glass)}
+  .dgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .close{all:unset; cursor:pointer; padding:8px 10px; border:1px solid var(--border); border-radius:10px}
+
+  /* Command palette */
+  .palette{
+    position:fixed; inset:0; display:none; place-items:center; z-index:50;
+  }
+  .palette.open{display:grid}
+  .palette .scrim{position:absolute; inset:0; background:rgba(0,0,0,.45); backdrop-filter: blur(2px)}
+  .palette .panel{
+    position:relative; width:min(800px, 92vw); background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+    border:1px solid var(--border); border-radius:16px; box-shadow:0 40px 90px rgba(0,0,0,.6);
+  }
+  .palette input{width:100%; background:transparent; border:0; outline:0; color:var(--fg); padding:14px 16px; font-size:16px}
+  .plist{max-height:50vh; overflow:auto; border-top:1px solid var(--border)}
+  .prow{padding:12px 16px; border-bottom:1px solid var(--border); cursor:pointer}
+  .prow:hover, .prow[aria-selected="true"]{background:rgba(255,255,255,.08)}
+
+  /* Toast */
+  .toast{position:fixed; right:16px; bottom:16px; padding:10px 12px; border:1px solid var(--border); background:var(--glass); border-radius:12px; display:none}
+  .toast.show{display:block}
+
+  /* Footer */
+  footer{opacity:.7; text-align:center; padding:30px 16px; font-size:12px; color:var(--muted)}
+
+  @media (max-width: 900px){
+    .fcol{grid-column: span 6}
+    .fcol.wide{grid-column: span 12}
+    .dbody{grid-template-columns: 1fr}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<header>
+  <div class="topbar" role="banner" aria-label="Continuity Atlas Topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>Continuity Atlas</div>
+    </div>
+    <span class="pill">100× per category</span>
+    <span class="pill">Offline • No libs</span>
+    <span class="pill">Filters • Cmd Palette <span class="kbd">⌘/Ctrl</span>+<span class="kbd">K</span></span>
+    <span class="pill">Search <span class="kbd">/</span></span>
+    <div style="margin-left:auto" class="pill">Saved Views</div>
+  </div>
+
+  <div class="toolbar" role="toolbar" aria-label="Global controls">
+    <div class="search" style="grid-column:1 / span 2">
+      🔎 <input id="q" placeholder="Search titles, tags, locations… (press /)" aria-label="Search"/>
+      <button class="btn ghost" id="clearSearch" title="Clear search">✖</button>
+    </div>
+    <button class="btn" id="cmdBtn" title="Open command palette (⌘/Ctrl+K)">⌘K</button>
+    <button class="btn" id="viewToggle" aria-pressed="false" title="Toggle list/grid">▦ View</button>
+    <button class="btn" id="themeToggle" aria-pressed="false" title="Toggle glow">✨ Glow</button>
+    <button class="btn primary" id="saveView" title="Save current filters as a view">★ Save View</button>
+    <div class="sep"></div>
+  </div>
+</header>
+
+<main>
+  <section class="filters" aria-label="Filters">
+    <div class="fcol">
+      <label for="category">Category</label>
+      <select id="category" multiple size="6" aria-label="Category filter">
+        <!-- Options injected -->
+      </select>
+      <small class="muted">Tip: hold Ctrl/Cmd to multi-select.</small>
+    </div>
+
+    <div class="fcol">
+      <label for="status">Status</label>
+      <select id="status" multiple size="6" aria-label="Status filter">
+        <option>planned</option>
+        <option>active</option>
+        <option>paused</option>
+        <option>complete</option>
+      </select>
+    </div>
+
+    <div class="fcol">
+      <label for="sort">Sort</label>
+      <select id="sort" aria-label="Sort">
+        <option value="date_desc">Newest</option>
+        <option value="date_asc">Oldest</option>
+        <option value="impact_desc">Impact ↑</option>
+        <option value="impact_asc">Impact ↓</option>
+        <option value="title_asc">Title A→Z</option>
+        <option value="title_desc">Title Z→A</option>
+      </select>
+      <div style="margin-top:8px">
+        <label for="perPage">Per page</label>
+        <select id="perPage">
+          <option>24</option><option selected>40</option><option>80</option><option>120</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fcol wide">
+      <label>Tags</label>
+      <div class="tags" id="tagBox" aria-label="Tag filters"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px">
+        <div>
+          <label for="dateFrom">From date</label>
+          <input type="date" id="dateFrom" />
+        </div>
+        <div>
+          <label for="dateTo">To date</label>
+          <input type="date" id="dateTo" />
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 90px; gap:10px; margin-top:10px">
+        <div>
+          <label for="impact">Impact threshold (<span id="impactVal">0</span>+)</label>
+          <input type="range" id="impact" min="0" max="100" value="0" />
+        </div>
+        <div>
+          <label for="severity">Severity</label>
+          <select id="severity">
+            <option value="">Any</option>
+            <option>low</option><option>medium</option><option>high</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" aria-label="Stats">
+    <div class="stat"><b id="countVisible">0</b><small class="muted">Visible</small></div>
+    <div class="stat"><b id="countTotal">0</b><small class="muted">Total</small></div>
+    <div class="stat"><b id="activeFilters">0</b><small class="muted">Active filters</small></div>
+    <div class="stat"><b id="pages">1 / 1</b><small class="muted">Page</small></div>
+  </section>
+
+  <section class="view" id="cards" aria-live="polite"></section>
+
+  <div style="display:flex; gap:10px; justify-content:center; margin-top:18px">
+    <button class="btn" id="prev">← Prev</button>
+    <button class="btn" id="next">Next →</button>
+    <button class="btn ghost" id="reset">Reset Filters</button>
+    <button class="btn ghost" id="export">Export JSON</button>
+    <label class="btn ghost" title="Import JSON"><input type="file" id="import" accept="application/json" style="display:none">Import JSON</label>
+  </div>
+
+</main>
+
+<footer>
+  Built as a single-file, offline-first atlas. Keyboard: <span class="kbd">/</span> focus search • <span class="kbd">j</span>/<span class="kbd">k</span> move • <span class="kbd">Enter</span> open • <span class="kbd">Esc</span> close • <span class="kbd">⌘/Ctrl</span>+<span class="kbd">K</span> command palette.
+</footer>
+
+<dialog id="detail">
+  <div class="dhead">
+    <div style="display:flex; align-items:center; gap:10px">
+      <div class="logo" style="width:22px;height:22px"></div>
+      <div>
+        <div id="dTitle" style="font-weight:700"></div>
+        <div id="dSubtitle" class="meta"></div>
+      </div>
+    </div>
+    <button class="close" id="closeDetail">Esc</button>
+  </div>
+  <div class="dbody">
+    <div class="dsection">
+      <div class="dgrid">
+        <div><label>ID</label><div id="dId" class="chip"></div></div>
+        <div><label>Category</label><div id="dCategory" class="chip"></div></div>
+        <div><label>Status</label><div id="dStatus" class="chip"></div></div>
+        <div><label>Severity</label><div id="dSeverity" class="chip"></div></div>
+        <div><label>Impact</label><div id="dImpact" class="chip"></div></div>
+        <div><label>Date</label><div id="dDate" class="chip"></div></div>
+        <div><label>Location</label><div id="dLocation" class="chip"></div></div>
+        <div><label>Tags</label><div id="dTags" class="metarow"></div></div>
+      </div>
+      <div style="margin-top:12px">
+        <label>Description</label>
+        <div id="dDesc" class="meta" style="line-height:1.6"></div>
+      </div>
+    </div>
+    <div class="dsection">
+      <label>Quick actions</label>
+      <div class="actions">
+        <button class="btn mini" id="copyDeepLink">🔗 Copy deep link</button>
+        <button class="btn mini" id="star">★ Star</button>
+        <button class="btn mini" id="note">📝 Add note</button>
+        <button class="btn mini" id="markComplete">✅ Mark complete</button>
+      </div>
+      <div style="margin-top:10px">
+        <label>Notes</label>
+        <textarea id="notes" rows="6" style="width:100%; background:rgba(255,255,255,.06); border:1px solid var(--border); color:var(--fg); border-radius:10px; padding:8px"></textarea>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Command palette -->
+<div class="palette" id="palette" aria-hidden="true">
+  <div class="scrim"></div>
+  <div class="panel">
+    <input id="cmdInput" placeholder="Type a command… (e.g., 'reset', 'export', 'toggle view', 'filter: tag mycelium')" aria-label="Command input" />
+    <div class="plist" id="cmdList" role="listbox" aria-label="Commands"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== Starfield (subtle, cheap) ===== */
+(function(){
+  const c = document.getElementById('stars');
+  const ctx = c.getContext('2d');
+  const DPR = Math.min(2, window.devicePixelRatio || 1);
+  function resize(){ c.width = innerWidth*DPR; c.height = innerHeight*DPR; }
+  function rnd(a,b){return Math.random()*(b-a)+a}
+  let stars=[];
+  function init(){
+    resize();
+    stars = Array.from({length: 300}, ()=>({x:rnd(0,c.width), y:rnd(0,c.height), s:rnd(0.4,1.8), v:rnd(0.02,0.08)}));
+    draw();
+  }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(const st of stars){
+      ctx.globalAlpha = st.s/2;
+      ctx.fillStyle = '#e6ecff';
+      ctx.fillRect(st.x, st.y, st.s, st.s);
+      st.y += st.v;
+      if(st.y>c.height){ st.y=-2; st.x=rnd(0,c.width); }
+    }
+    requestAnimationFrame(draw);
+  }
+  addEventListener('resize', init); init();
+})();
+
+/* ===== Data generation: 100 items per category ===== */
+const CATEGORIES = [
+  "Corruption Watch",
+  "Restoration Nodes",
+  "__Siberian Apple Orchard",
+  "Peace Ripple",
+  "AI Orchestration"
+];
+const TAGS_POOL = ["mycelium","water","air","governance","solar","audit","education","biosphere","mesh","civic","crypto","mapping","forensics","ethics","zero-harm","supply","fire","health","signal","dashboard"];
+const STATUSES = ["planned","active","paused","complete"];
+const SEVERITIES = ["low","medium","high"];
+const LOCATIONS = ["Fort McMurray, AB","Vancouver, BC","Calgary, AB","Edmonton, AB","Victoria, BC","Kelowna, BC","Prince George, BC","Toronto, ON","Ottawa, ON","Winnipeg, MB","Halifax, NS","St. John's, NL","Remote/Distributed"];
+let DATA = [];
+
+function seededRandom(seed){
+  let t = seed % 2147483647; if (t<=0) t+=2147483646;
+  return ()=> (t = t*16807 % 2147483647) / 2147483647;
+}
+
+function generate(){
+  const now = Date.now();
+  let id=1;
+  for(const cat of CATEGORIES){
+    const rand = seededRandom(cat.length*9997 + 1337);
+    for(let i=0;i<100;i++){
+      const impact = Math.floor(rand()*101);
+      const sev = SEVERITIES[Math.floor(rand()*SEVERITIES.length)];
+      const status = STATUSES[Math.floor(rand()*STATUSES.length)];
+      const daysAgo = Math.floor(rand()*365);
+      const date = new Date(now - daysAgo*86400000);
+      const title = `${cat} #${(i+1).toString().padStart(3,'0')}`;
+      const tagsCount = 2 + Math.floor(rand()*3);
+      const tags = Array.from({length:tagsCount}, ()=> TAGS_POOL[Math.floor(rand()*TAGS_POOL.length)])
+                        .filter((v,i,a)=>a.indexOf(v)===i);
+      const location = LOCATIONS[Math.floor(rand()*LOCATIONS.length)];
+      DATA.push({
+        id: String(id++).padStart(5,'0'),
+        title, category:cat, impact, severity:sev, status, date: date.toISOString().slice(0,10),
+        tags, location,
+        desc: `Auto-generated placeholder for “${title}” in ${cat}. Impact ${impact}, severity ${sev}, status ${status}. Location ${location}. Tags: ${tags.join(', ')}.`
+      });
+    }
+  }
+}
+generate();
+
+/* ===== State & helpers ===== */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+const el = (tag, props={}, ...kids) => {
+  const n = document.createElement(tag);
+  Object.assign(n, props);
+  for(const k of kids) n.append(k);
+  return n;
+};
+
+const state = {
+  q: "", categories: new Set(), statuses: new Set(), tags: new Set(),
+  dateFrom: "", dateTo: "", impactMin: 0, severity:"",
+  sort: "date_desc", perPage: 40, page: 1, view: "grid", glow:false
+};
+
+function syncHash(){
+  const params = new URLSearchParams();
+  if(state.q) params.set("q", state.q);
+  if(state.categories.size) params.set("cat", [...state.categories].join(","));
+  if(state.statuses.size) params.set("st", [...state.statuses].join(","));
+  if(state.tags.size) params.set("tags", [...state.tags].join(","));
+  if(state.dateFrom) params.set("from", state.dateFrom);
+  if(state.dateTo) params.set("to", state.dateTo);
+  if(state.impactMin) params.set("impact", state.impactMin);
+  if(state.severity) params.set("sev", state.severity);
+  if(state.sort!=="date_desc") params.set("sort", state.sort);
+  if(state.perPage!==40) params.set("pp", state.perPage);
+  if(state.page!==1) params.set("p", state.page);
+  if(state.view!=="grid") params.set("view", state.view);
+  if(state.glow) params.set("glow","1");
+  location.hash = params.toString();
+}
+
+function readHash(){
+  const h = new URLSearchParams(location.hash.replace(/^#/,''));
+  state.q = h.get("q")||"";
+  state.categories = new Set((h.get("cat")||"").split(",").filter(Boolean));
+  state.statuses = new Set((h.get("st")||"").split(",").filter(Boolean));
+  state.tags = new Set((h.get("tags")||"").split(",").filter(Boolean));
+  state.dateFrom = h.get("from")||"";
+  state.dateTo = h.get("to")||"";
+  state.impactMin = Number(h.get("impact")||0);
+  state.severity = h.get("sev")||"";
+  state.sort = h.get("sort")||"date_desc";
+  state.perPage = Number(h.get("pp")||40);
+  state.page = Number(h.get("p")||1);
+  state.view = h.get("view")||"grid";
+  state.glow = !!h.get("glow");
+}
+
+/* ===== UI init ===== */
+function initFilters(){
+  const catSel = $("#category");
+  for(const c of CATEGORIES) catSel.append(new Option(c,c, false, state.categories.has(c)));
+  const tagBox = $("#tagBox");
+  const tagSort = [...new Set(TAGS_POOL)].sort();
+  for(const t of tagSort){
+    const b = el("button",{className:"tag", textContent:t});
+    b.setAttribute("aria-pressed", state.tags.has(t)?"true":"false");
+    b.addEventListener("click", ()=>{ 
+      if(state.tags.has(t)) state.tags.delete(t); else state.tags.add(t);
+      b.setAttribute("aria-pressed", state.tags.has(t)?"true":"false");
+      state.page=1; render();
+    });
+    tagBox.append(b);
+  }
+  $("#status").value = null; // multiple
+  $("#sort").value = state.sort;
+  $("#perPage").value = String(state.perPage);
+  $("#impact").value = state.impactMin; $("#impactVal").textContent = state.impactMin;
+  $("#severity").value = state.severity;
+  $("#dateFrom").value = state.dateFrom; $("#dateTo").value = state.dateTo;
+  $("#q").value = state.q;
+  $("#viewToggle").setAttribute("aria-pressed", state.view==="list"?"true":"false");
+  document.body.style.setProperty('--shadow', state.glow? '0 0 30px rgba(102,230,255,.25)': '0 10px 30px rgba(0,0,0,.35)');
+  $("#themeToggle").setAttribute("aria-pressed", state.glow?"true":"false");
+}
+
+/* ===== Filtering, sorting, paging ===== */
+function match(item){
+  // text
+  if(state.q){
+    const q = state.q.toLowerCase();
+    const blob = (item.title+" "+item.category+" "+item.location+" "+item.tags.join(" ")).toLowerCase();
+    if(!blob.includes(q)) return false;
+  }
+  // categories
+  if(state.categories.size && !state.categories.has(item.category)) return false;
+  // statuses
+  if(state.statuses.size && !state.statuses.has(item.status)) return false;
+  // tags (intersection)
+  if(state.tags.size){
+    const hasAll = [...state.tags].every(t=> item.tags.includes(t));
+    if(!hasAll) return false;
+  }
+  // date
+  if(state.dateFrom && item.date < state.dateFrom) return false;
+  if(state.dateTo && item.date > state.dateTo) return false;
+  // impact
+  if(item.impact < state.impactMin) return false;
+  // severity
+  if(state.severity && item.severity!==state.severity) return false;
+  return true;
+}
+
+function sortItems(arr){
+  const byTitle = (a,b)=> a.title.localeCompare(b.title);
+  const byDate = (a,b)=> a.date.localeCompare(b.date);
+  const byImpact = (a,b)=> a.impact - b.impact;
+  switch(state.sort){
+    case "date_desc": return arr.sort((a,b)=> byDate(a,b) ? (byDate(b,a)) : 0).reverse();
+    case "date_asc": return arr.sort(byDate);
+    case "impact_desc": return arr.sort(byImpact).reverse();
+    case "impact_asc": return arr.sort(byImpact);
+    case "title_asc": return arr.sort(byTitle);
+    case "title_desc": return arr.sort(byTitle).reverse();
+  }
+  return arr;
+}
+
+function paginate(arr){
+  const start = (state.page-1)*state.perPage;
+  return arr.slice(start, start+state.perPage);
+}
+
+/* ===== Rendering ===== */
+let lastVisible = [];
+function render(){
+  // collect UI selections
+  const catSel = $("#category");
+  const selectedCats = [...catSel.selectedOptions].map(o=>o.value);
+  state.categories = new Set(selectedCats);
+
+  const stSel = $("#status");
+  const selectedSt = [...stSel.selectedOptions].map(o=>o.value);
+  state.statuses = new Set(selectedSt);
+
+  state.sort = $("#sort").value;
+  state.perPage = Number($("#perPage").value);
+  state.severity = $("#severity").value;
+  state.dateFrom = $("#dateFrom").value;
+  state.dateTo = $("#dateTo").value;
+
+  // filter/sort
+  const filtered = DATA.filter(match);
+  sortItems(filtered);
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / state.perPage));
+  if(state.page>pages) state.page = pages;
+  const pageItems = paginate(filtered);
+  lastVisible = filtered;
+
+  // stats
+  $("#countVisible").textContent = pageItems.length;
+  $("#countTotal").textContent = DATA.length;
+  const fCount = Number(!!state.q) + Number(!!state.categories.size) + Number(!!state.statuses.size) + Number(!!state.tags.size) + Number(!!state.dateFrom||!!state.dateTo) + Number(!!state.impactMin) + Number(!!state.severity);
+  $("#activeFilters").textContent = fCount;
+  $("#pages").textContent = `${state.page} / ${pages}`;
+
+  // view toggle
+  const cards = $("#cards");
+  cards.classList.toggle("rowview", state.view==="list");
+  cards.innerHTML = "";
+  for(const it of pageItems){
+    const c = el("article",{className:"card", tabIndex:0});
+    c.dataset.id = it.id;
+    c.innerHTML = `
+      <div class="badge">${it.category}</div>
+      <h3 class="title">${escapeHtml(it.title)}</h3>
+      <div class="meta">${escapeHtml(it.location)} • ${it.date} • <b>${it.status}</b> • sev:${it.severity}</div>
+      <div class="metarow">${it.tags.map(t=>`<span class="chip">#${escapeHtml(t)}</span>`).join("")}</div>
+      <div class="impactbar"><span style="width:${it.impact}%"></span></div>
+      <div class="actions">
+        <button class="btn mini" data-act="open">Inspect</button>
+        <button class="btn mini" data-act="link">Deep link</button>
+        <button class="btn mini" data-act="fav">☆</button>
+      </div>
+    `;
+    c.addEventListener("dblclick", ()=> openDetail(it));
+    c.addEventListener("keydown", (e)=>{ if(e.key==="Enter") openDetail(it); });
+    c.querySelector('[data-act="open"]').addEventListener("click", ()=> openDetail(it));
+    c.querySelector('[data-act="link"]').addEventListener("click", ()=> copyDeepLinkFor(it));
+    c.querySelector('[data-act="fav"]').addEventListener("click", (e)=>{ toggleStar(it); e.currentTarget.textContent = isStarred(it.id) ? "★" : "☆"; });
+    cards.append(c);
+  }
+
+  syncHash();
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+/* ===== Detail modal ===== */
+const detail = $("#detail");
+function openDetail(it){
+  $("#dTitle").textContent = it.title;
+  $("#dSubtitle").textContent = `${it.location} • ${it.date}`;
+  $("#dId").textContent = it.id;
+  $("#dCategory").textContent = it.category;
+  $("#dStatus").textContent = it.status;
+  $("#dSeverity").textContent = it.severity;
+  $("#dImpact").textContent = it.impact;
+  $("#dDate").textContent = it.date;
+  $("#dLocation").textContent = it.location;
+  $("#dTags").innerHTML = it.tags.map(t=>`<span class="chip">#${escapeHtml(t)}</span>`).join("");
+  $("#dDesc").textContent = it.desc;
+  $("#notes").value = localStorage.getItem(noteKey(it.id)) || "";
+  detail.showModal();
+  $("#copyDeepLink").onclick = ()=> copyDeepLinkFor(it);
+  $("#star").onclick = ()=>{ toggleStar(it); toast(isStarred(it.id) ? "Starred" : "Unstarred"); };
+  $("#note").onclick = ()=>{ localStorage.setItem(noteKey(it.id), $("#notes").value); toast("Note saved"); };
+  $("#markComplete").onclick = ()=>{ it.status="complete"; render(); toast("Marked complete"); };
+}
+$("#closeDetail").onclick = ()=> detail.close();
+detail.addEventListener("close", ()=> $("#notes").blur());
+
+/* ===== Deep link & stars ===== */
+function deepLinkFor(it){
+  const params = new URLSearchParams();
+  params.set("q", it.title);
+  params.set("cat", it.category);
+  return location.origin + location.pathname + "#" + params.toString();
+}
+function copyDeepLinkFor(it){
+  const url = deepLinkFor(it);
+  navigator.clipboard.writeText(url);
+  toast("Deep link copied");
+}
+function starKey(){ return "atlas-stars"; }
+function noteKey(id){ return `atlas-note-${id}`;}
+function getStars(){ try{ return new Set(JSON.parse(localStorage.getItem(starKey())||"[]")); }catch{ return new Set(); } }
+function setStars(s){ localStorage.setItem(starKey(), JSON.stringify([...s])); }
+function isStarred(id){ return getStars().has(id); }
+function toggleStar(it){
+  const s = getStars();
+  if(s.has(it.id)) s.delete(it.id); else s.add(it.id);
+  setStars(s); render();
+}
+
+/* ===== Command palette ===== */
+const palette = $("#palette");
+const cmdInput = $("#cmdInput");
+const cmdList = $("#cmdList");
+const COMMANDS = [
+  {t:"reset", a:()=>{$("#reset").click()}},
+  {t:"export", a:()=>{$("#export").click()}},
+  {t:"import", a:()=>{$("#import").click()}},
+  {t:"toggle view", a:()=>{$("#viewToggle").click()}},
+  {t:"toggle glow", a:()=>{$("#themeToggle").click()}},
+  {t:"help", a:()=> toast("Commands: reset, export, import, toggle view, toggle glow, filter: tag <name>, category: <name>, status: <name>")}
+];
+function openPalette(){
+  palette.classList.add("open");
+  cmdInput.value=""; cmdInput.focus();
+  buildCmdList("");
+}
+function closePalette(){ palette.classList.remove("open"); }
+function buildCmdList(q){
+  cmdList.innerHTML="";
+  const base = COMMANDS.slice();
+  // dynamic suggestions from tags/cats/status
+  for(const t of TAGS_POOL) base.push({t:`filter: tag ${t}`, a:()=>{ state.tags.add(t); render(); }});
+  for(const c of CATEGORIES) base.push({t:`category: ${c}`, a:()=>{ state.categories = new Set([c]); render(); }});
+  for(const s of STATUSES) base.push({t:`status: ${s}`, a:()=>{ state.statuses = new Set([s]); render(); }});
+  const ql = q.toLowerCase();
+  const list = (q? base.filter(x=>x.t.toLowerCase().includes(ql)):base).slice(0,40);
+  list.forEach((x,i)=>{
+    const row = el("div",{className:"prow", textContent:x.t});
+    if(i===0) row.setAttribute("aria-selected","true");
+    row.addEventListener("click", ()=>{ x.a(); closePalette(); });
+    cmdList.append(row);
+  });
+}
+cmdInput.addEventListener("input", e=> buildCmdList(e.target.value));
+cmdInput.addEventListener("keydown", e=>{
+  const rows = $$("#cmdList .prow");
+  const idx = rows.findIndex(r=> r.getAttribute("aria-selected")==="true");
+  if(e.key==="ArrowDown"){ e.preventDefault(); const n = Math.min(rows.length-1, idx+1); rows.forEach(r=>r.removeAttribute("aria-selected")); rows[n]?.setAttribute("aria-selected","true"); rows[n]?.scrollIntoView({block:"nearest"});}
+  if(e.key==="ArrowUp"){ e.preventDefault(); const n = Math.max(0, idx-1); rows.forEach(r=>r.removeAttribute("aria-selected")); rows[n]?.setAttribute("aria-selected","true"); rows[n]?.scrollIntoView({block:"nearest"});}
+  if(e.key==="Enter"){ e.preventDefault(); const r = rows.find(r=>r.getAttribute("aria-selected")==="true"); if(!r) return; const cmd = r.textContent; const item = COMMANDS.find(c=>c.t===cmd) || {a:()=>{}}; // fallback dynamic handled below
+    // dynamic parse
+    if(cmd.startsWith("filter: tag ")){ state.tags.add(cmd.replace("filter: tag ","")); render(); closePalette(); return; }
+    if(cmd.startsWith("category: ")){ state.categories = new Set([cmd.replace("category: ","")]); render(); closePalette(); return; }
+    if(cmd.startsWith("status: ")){ state.statuses = new Set([cmd.replace("status: ","")]); render(); closePalette(); return; }
+    item.a(); closePalette();
+  }
+  if(e.key==="Escape"){ closePalette(); }
+});
+$("#cmdBtn").onclick = openPalette;
+addEventListener("keydown", e=>{
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); palette.classList.contains("open")? closePalette(): openPalette(); }
+});
+
+/* ===== Controls & events ===== */
+$("#q").addEventListener("input", e=>{ state.q = e.target.value; state.page=1; render(); });
+addEventListener("keydown", e=>{ if(e.key==="/"){ const ae = document.activeElement; if(ae && (ae.tagName==="INPUT"||ae.tagName==="TEXTAREA")) return; e.preventDefault(); $("#q").focus(); }});
+$("#clearSearch").onclick = ()=>{ $("#q").value=""; state.q=""; state.page=1; render(); };
+
+$("#impact").addEventListener("input", e=>{ state.impactMin = Number(e.target.value); $("#impactVal").textContent = state.impactMin; state.page=1; render(); });
+
+$("#viewToggle").onclick = ()=>{ state.view = state.view==="grid"?"list":"grid"; render(); };
+$("#themeToggle").onclick = ()=>{ state.glow = !state.glow; document.body.style.setProperty('--shadow', state.glow? '0 0 30px rgba(102,230,255,.25)': '0 10px 30px rgba(0,0,0,.35)'); render(); };
+
+$("#prev").onclick = ()=>{ if(state.page>1){ state.page--; render(); }};
+$("#next").onclick = ()=>{ const pages = Math.max(1, Math.ceil(lastVisible.length / state.perPage)); if(state.page<pages){ state.page++; render(); }};
+
+$("#reset").onclick = ()=>{
+  Object.assign(state, { q:"", categories:new Set(), statuses:new Set(), tags:new Set(),
+    dateFrom:"", dateTo:"", impactMin:0, severity:"", sort:"date_desc", perPage:40, page:1, view:state.view, glow:state.glow });
+  // clear UI selections
+  $$("#category option").forEach(o=>o.selected=false);
+  $$("#status option").forEach(o=>o.selected=false);
+  $$("#tagBox .tag").forEach(b=>b.setAttribute("aria-pressed","false"));
+  $("#q").value=""; $("#dateFrom").value=""; $("#dateTo").value="";
+  $("#impact").value=0; $("#impactVal").textContent="0";
+  $("#severity").value=""; $("#sort").value="date_desc"; $("#perPage").value="40";
+  render();
+};
+
+$("#export").onclick = ()=>{
+  const blob = new Blob([JSON.stringify(DATA,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = el("a",{href:url, download:"continuity-atlas.json"}); a.click();
+  setTimeout(()=> URL.revokeObjectURL(url), 1000);
+  toast("Exported JSON");
+};
+$("#import").addEventListener("change", async e=>{
+  const file = e.target.files[0]; if(!file) return;
+  const text = await file.text();
+  try{
+    const parsed = JSON.parse(text);
+    if(Array.isArray(parsed) && parsed[0] && parsed[0].title){
+      DATA = parsed;
+      initTagCloud(); initCategorySelect();
+      state.page=1; render(); toast("Imported JSON");
+    }else throw new Error("Invalid format");
+  }catch(err){ toast("Import failed: "+err.message); }
+});
+
+/* Save view */
+function viewsKey(){ return "atlas-views"; }
+function getViews(){ try{ return JSON.parse(localStorage.getItem(viewsKey())||"[]"); }catch{ return []; } }
+function setViews(v){ localStorage.setItem(viewsKey(), JSON.stringify(v)); }
+$("#saveView").onclick = ()=>{
+  const name = prompt("Name this view:");
+  if(!name) return;
+  const snapshot = {...state,
+    categories:[...state.categories], statuses:[...state.statuses], tags:[...state.tags]
+  };
+  const views = getViews().filter(v=>v.name!==name);
+  views.push({name, snapshot});
+  setViews(views);
+  toast("View saved");
+}
+
+/* Deep-link & back/forward */
+addEventListener("hashchange", ()=>{ readHash(); initFilters(); render(); });
+
+/* Keyboard navigation in list */
+addEventListener("keydown", e=>{
+  if(document.activeElement===cmdInput) return;
+  if(detail.open){ if(e.key==="Escape") detail.close(); return; }
+  const focusables = $$("#cards .card");
+  const idx = focusables.indexOf(document.activeElement);
+  if(e.key==="j"){ e.preventDefault(); const n = Math.min(focusables.length-1, idx+1); (focusables[n]||focusables[0])?.focus(); }
+  if(e.key==="k"){ e.preventDefault(); const n = Math.max(0, idx-1); (focusables[n]||focusables[0])?.focus(); }
+});
+
+/* Helpers to rebuild tag/category UI if DATA replaced */
+function initTagCloud(){
+  const tagBox = $("#tagBox"); tagBox.innerHTML="";
+  const pool = [...new Set(DATA.flatMap(d=>d.tags))].slice(0,60).sort();
+  for(const t of pool){
+    const b = el("button",{className:"tag", textContent:t});
+    b.setAttribute("aria-pressed", state.tags.has(t)?"true":"false");
+    b.addEventListener("click", ()=>{ 
+      if(state.tags.has(t)) state.tags.delete(t); else state.tags.add(t);
+      b.setAttribute("aria-pressed", state.tags.has(t)?"true":"false");
+      state.page=1; render();
+    });
+    tagBox.append(b);
+  }
+}
+function initCategorySelect(){
+  const catSel = $("#category"); catSel.innerHTML="";
+  const cats = [...new Set(DATA.map(d=>d.category))].sort();
+  for(const c of cats) catSel.append(new Option(c,c, false, state.categories.has(c)));
+}
+
+/* Toast */
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  setTimeout(()=> t.classList.remove("show"), 1800);
+}
+
+/* Accessibility niceties */
+document.addEventListener('DOMContentLoaded', ()=>{
+  readHash();
+  initFilters();
+  initTagCloud();
+  initCategorySelect();
+  render();
+});
+
+/* Utility for copying deep link in detail */
+function copyDeepLink(){ navigator.clipboard.writeText(location.href); toast("Deep link copied"); }
+</script>
+</body>
+</html>
